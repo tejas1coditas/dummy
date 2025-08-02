@@ -1,3 +1,4 @@
+import 'package:assignment_4/constants/constants.dart';
 import 'package:assignment_4/models/notes_model.dart';
 import 'package:assignment_4/notes_provider/notes_provider.dart';
 import 'package:flutter/material.dart';
@@ -29,24 +30,55 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.grey,
-          title: const Text('Save Changes?'),
+          backgroundColor: backgroundColor,
+          title: Icon(Icons.info, color: Colors.white),
+
+          content: Text(
+            'Are you sure you want to save?',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 23,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
 
           actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('Discard'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Dismiss the dialog
-              },
-            ),
-            TextButton(
-              style: TextButton.styleFrom(backgroundColor: Colors.green),
-              child: const Text('Save'),
-              onPressed: () {
-                _saveNote();
-                Navigator.of(context).pop(); // Dismiss the dialog
-              },
+            // TextButton(
+            //   style: TextButton.styleFrom(backgroundColor: Colors.red),
+            //   child: const Text('Discard'),
+            //   onPressed: () {
+            //     Navigator.of(context).pop(); // Dismiss the dialog
+            //   },
+            // ),
+            // TextButton(
+            //   style: TextButton.styleFrom(backgroundColor: Colors.green),
+            //   child: const Text('Save'),
+            //   onPressed: () {
+            //     _saveNote();
+            //     Navigator.of(context).pop(); // Dismiss the dialog
+            //   },
+            // ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  style: TextButton.styleFrom(backgroundColor: Colors.red),
+                  child: const Text('Discard'),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Dismiss the dialog
+                  },
+                ),
+
+                SizedBox(width: 15),
+                TextButton(
+                  style: TextButton.styleFrom(backgroundColor: Colors.green),
+                  child: const Text('Save'),
+                  onPressed: () {
+                    _saveNote();
+                    Navigator.of(context).pop(); // Dismiss the dialog
+                  },
+                ),
+              ],
             ),
           ],
         );
