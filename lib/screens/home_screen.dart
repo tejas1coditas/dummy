@@ -1,8 +1,9 @@
-import 'package:assignment_3/models/task_future_builder.dart';
-import 'package:assignment_3/models/task_model.dart';
-import 'package:assignment_3/screens/add_task_screen.dart';
-import 'package:assignment_3/screens/edit_task_screen.dart';
+import 'package:assignment_4/notes_provider/notes_provider.dart';
+import 'package:assignment_4/screens/add_note_screen.dart';
+import 'package:assignment_4/screens/edit_note_screen.dart';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,120 +13,105 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Future<List<TaskModel>> taskfuture = TaskDatabase().getTask();
-
-  void refreshTask() {
-    setState(() {
-      taskfuture = TaskDatabase().getTask();
-    });
-  }
-
-  Stream<int> getTaskCount() async* {
-    yield TaskDatabase.tasklist.length;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: StreamBuilder<int>(
-          stream: getTaskCount(),
-          builder: (context, snapshot) {
-            final countofTasks = snapshot.data ?? 0;
-            return Text('Tasks $countofTasks');
-          },
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () async {
-              final newTask = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => AddTaskScreen()),
-              );
-              if (newTask != null && newTask is TaskModel) {
-                TaskDatabase.addTask(newTask);
-                refreshTask();
-              }
-            },
-            icon: Icon(Icons.add),
+        title: Text(
+          'Notes',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w400,
+            fontSize: 43,
           ),
+        ),
+        actions: [
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Color.fromARGB(255, 78, 78, 78),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: IconButton(
+              onPressed: () {
+               
+              },
+              icon: Icon(Icons.search),
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(width: 10),
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Color.fromARGB(255, 78, 78, 78),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Icon(Icons.info, color: Colors.white),
+          ),
+          SizedBox(width: 10),
         ],
+        centerTitle: false,
+        backgroundColor: Colors.transparent,
       ),
 
-      body: FutureBuilder<List<TaskModel>>(
-        future: taskfuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No tasks available.'));
-          }
-          final tasks = snapshot.data!;
-
-          return ReorderableListView.builder(
-            itemCount: tasks.length,
-            onReorder: (oldIndex, newIndex) {
-              setState(() {
-                if (newIndex > oldIndex) newIndex -= 1;
-                final item = tasks.removeAt(oldIndex);
-                tasks.insert(newIndex, item);
-
-                // Update the static database list
-                TaskDatabase.tasklist = tasks;
-                refreshTask();
-              });
-            },
-            itemBuilder: (_, index) {
-              final task = tasks[index];
-              return ListTile(
-                key: ValueKey(task.title + task.dueDate), // Must be unique
-                onTap: () async {
-                  final updatedTask = await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => EditTask(task: task)),
-                  );
-                  if (updatedTask != null) {
-                    TaskDatabase.updateTask(task, updatedTask);
-                    refreshTask();
-                  }
-                },
-                leading: Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(8),
+      body: Consumer<NotesProvider>(
+        builder: (context, noteprovider, child) => noteprovider.notes.isEmpty
+            ? Column(
+                children: [
+                  Image.asset('assets/home_screen.png'),
+                  Text(
+                    'Create your first note!!',
+                    style: TextStyle(color: Colors.white),
                   ),
-                  padding: EdgeInsets.all(8),
-                  child: Icon(Icons.menu),
-                ),
-                title: Text(task.title),
-                subtitle: Text(task.dueDate),
-              );
-            },
-          );
-        },
-      ),
+                ],
+              )
+            : Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: ListView.separated(
+                  itemBuilder: (context, index) {
+                    final note = noteprovider.getNotes()[index];
+                    return ListTile(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditNoteScreen(notes: note),
+                          ),
+                        );
+                      },
 
+                      onLongPress: () {},
+                      title: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 17),
+                        child: Text(
+                          note.title,
+                          style: TextStyle(color: Colors.white, fontSize: 25),
+                        ),
+                      ),
+                      tileColor: Colors.blue.shade400,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    );
+                  },
+                  separatorBuilder: (context, child) => SizedBox(height: 20),
+                  itemCount: noteprovider.getLength(),
+                ),
+              ),
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final newTask = await Navigator.push(
+        onPressed: () {
+          Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => AddTaskScreen()),
+            MaterialPageRoute(builder: (context) => AddNoteScreen()),
           );
-          if (newTask != null && newTask is TaskModel) {
-            TaskDatabase.addTask(newTask);
-            refreshTask();
-          }
         },
-        child: Icon(Icons.add),
+        backgroundColor: Color.fromARGB(255, 78, 78, 78),
+        elevation: 50,
+
+        shape: CircleBorder(),
+        child: Icon(Icons.add_outlined, color: Colors.white, size: 48),
       ),
     );
   }
