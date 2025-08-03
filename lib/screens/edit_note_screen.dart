@@ -1,8 +1,9 @@
+
 import 'package:assignment_4/constants/constants.dart';
+import 'package:assignment_4/helper_functions/helper_function.dart';
 import 'package:assignment_4/models/notes_model.dart';
-import 'package:assignment_4/notes_provider/notes_provider.dart';
+
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class EditNoteScreen extends StatefulWidget {
   const EditNoteScreen({super.key, required this.notes});
@@ -19,85 +20,10 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   @override
   void initState() {
     super.initState();
-    titleController = TextEditingController(text: widget.notes.title);
+    titleController = TextEditingController(text: widget.notes.title.trim());
     descriptionController = TextEditingController(
-      text: widget.notes.description,
+      text: widget.notes.description.trim(),
     );
-  }
-
-  void _showSaveConfirmationDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: backgroundColor,
-          title: Icon(Icons.info, color: Colors.white),
-
-          content: Text(
-            'Are you sure you want to save?',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 23,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-
-          actions: <Widget>[
-            // TextButton(
-            //   style: TextButton.styleFrom(backgroundColor: Colors.red),
-            //   child: const Text('Discard'),
-            //   onPressed: () {
-            //     Navigator.of(context).pop(); // Dismiss the dialog
-            //   },
-            // ),
-            // TextButton(
-            //   style: TextButton.styleFrom(backgroundColor: Colors.green),
-            //   child: const Text('Save'),
-            //   onPressed: () {
-            //     _saveNote();
-            //     Navigator.of(context).pop(); // Dismiss the dialog
-            //   },
-            // ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  style: TextButton.styleFrom(backgroundColor: Colors.red),
-                  child: const Text('Discard'),
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Dismiss the dialog
-                  },
-                ),
-
-                SizedBox(width: 15),
-                TextButton(
-                  style: TextButton.styleFrom(backgroundColor: Colors.green),
-                  child: const Text('Save'),
-                  onPressed: () {
-                    _saveNote();
-                    Navigator.of(context).pop(); // Dismiss the dialog
-                  },
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _saveNote() {
-    final title = titleController.text;
-    final description = descriptionController.text;
-    if (title.isNotEmpty) {
-      final updatedNote = NotesModel(title: title, description: description);
-
-      Provider.of<NotesProvider>(
-        context,
-        listen: false,
-      ).updateTask(widget.notes, updatedNote);
-      Navigator.pop(context);
-    }
   }
 
   @override
@@ -109,20 +35,28 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
           onTap: () {
             Navigator.pop(context);
           },
-          child: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          child: Icon(Icons.arrow_back_ios, color: whiteColor),
         ),
         actions: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 78, 78, 78),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: GestureDetector(
-              onTap: () {
-                _showSaveConfirmationDialog();
-              },
-              child: const Icon(Icons.save, color: Colors.white),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 25, 0),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: containerColor,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: GestureDetector(
+                onTap: () {
+                  showSaveConfirmationDialog(
+                    context: context,
+                    titleController: titleController,
+                    descriptionController: descriptionController,
+                    originalNote: widget.notes,
+                  );
+                },
+                child: Icon(Icons.save, color: whiteColor),
+              ),
             ),
           ),
         ],
@@ -141,10 +75,10 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                   child: TextField(
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
-                    style: const TextStyle(color: Colors.white, fontSize: 46),
+                    style:  TextStyle(color: whiteColor, fontSize: 46),
                     controller: titleController,
                     cursorHeight: 38,
-                    cursorColor: Colors.white,
+                    cursorColor: whiteColor,
                     decoration: const InputDecoration(border: InputBorder.none),
                   ),
                 ),
@@ -157,10 +91,13 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                   child: TextField(
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    style:  TextStyle(color: whiteColor, fontSize: 16),
                     controller: descriptionController,
-                    cursorColor: Colors.white,
-                    decoration: const InputDecoration(border: InputBorder.none),
+                    cursorColor: whiteColor,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Type something....',
+                    ),
                   ),
                 ),
               ),

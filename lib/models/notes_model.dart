@@ -3,5 +3,4 @@ class NotesModel {
   final String description;
 
   NotesModel({required this.title, required this.description});
-
 }
